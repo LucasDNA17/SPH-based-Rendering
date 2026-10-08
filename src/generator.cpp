@@ -99,7 +99,7 @@ void generateParaboloid(const int n_samples, const float kernelRadius)
 }
 
 
-void generateDoubleCup(const float kernelRadius)
+void generateDoubleCup(const int n_samples, const float kernelRadius)
 {
     size_t range_min, range_max;
     std::cout << "Insert first min and max range: ";
@@ -107,32 +107,31 @@ void generateDoubleCup(const float kernelRadius)
 
     std::ofstream particles_file("grid.txt");
 
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> u1(range_min, range_max);
+
     particles_file << kernelRadius << std::endl;
     std::cout << "Generating particles..." << std::endl;
 
-    for(size_t i = range_min; i <= range_max; i++)
+    for(int i = 0; i < n_samples; i++)
     {
-        for(size_t j = range_min; j <= range_max; j++)
-        {
-            for(size_t k =range_min; k <= range_max; k++)
-            {
-                particles_file << i << " " << j << " " << k << " " << 100 << " " << 1 << '\n';
-            }            
-        }
+        float x = u1(gen), y = u1(gen), z = u1(gen);
+        particles_file << x << " " << y << " " << z << " " << 10 << " " << 1 << '\n';
     }
+
+    std::cout << "Done generating particles.\n";
 
     std::cout << "Insert second min and max range: ";
     std::cin >> range_min >> range_max;
 
-    for(size_t i = range_min; i <= range_max; i++)
+    std::uniform_real_distribution<float> u2(range_min, range_max);
+
+    std::cout << "Generating particles...\n";
+    for(int i = 0; i < n_samples; i++)
     {
-        for(size_t j = range_min; j <= range_max; j++)
-        {
-            for(size_t k =range_min; k <= range_max; k++)
-            {
-                particles_file << i << " " << j << " " << k << " " << 10 << " " << 1 << '\n';
-            }            
-        }
+        float x = u2(gen), y = u2(gen), z = u2(gen);
+        particles_file << x << " " << y << " " << z << " " << 100 << " " << 1 << '\n';
     }
 
     particles_file.close();
