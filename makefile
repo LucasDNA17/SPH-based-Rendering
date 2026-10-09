@@ -1,11 +1,24 @@
-CC = g++ -Werror -Wall
-FLAGS = -g -O3
+CXX = g++
+CXXFLAGS = -Werror -Wall -g -O3 
 
-gen:
-	$(CC) $(FLAGS) -o gen src/generator.cpp generate.cpp
+SPH_DEPS = include/kernel.hpp include/particle.hpp include/SPH.hpp
+GENERATE_DEPS = include/generator.hpp
 
-SPH:
-	$(CC) $(FLAGS) -o SPH src/particle.cpp src/kernel.cpp src/SPH.cpp main.cpp
+GEN_OBJS = src/generator.o generate.o
+SPH_OBJS = src/kernel.o src/particle.o src/SPH.o main.o
+
+.PHONY: all clean
+
+all: gen SPH
+
+%.o: %.cpp $(SPH_DEPS) $(GENERATE_DEPS)
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+gen: $(GEN_OBJS)
+	$(CXX) $(CXXFLAGS) -o gen $(GEN_OBJS)
+
+SPH: $(SPH_OBJS)
+	$(CXX) $(CXXFLAGS) -o SPH $(SPH_OBJS)
 
 clean:
-	rm gen SPH
+	rm -f *.o gen SPH src/*.o
