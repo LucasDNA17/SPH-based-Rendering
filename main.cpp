@@ -34,9 +34,9 @@ int main(int argc, char **argv)
     algo.setGrid(0, 4, 0, 2, 0, 3, 0.02f);
     std::cout << "Done setting grid.\n";
 
-    std::cout << "Running algorithm...\n";
+    std::cout << "Running SPH algorithm...\n";
     algo.run();
-    std::cout << "Done. running algorithm\n";
+    std::cout << "Done running SPH algorithm\n";
 
     std::cout << "Writing results to file...\n";
     algo.writeTxt(argv[2]);
