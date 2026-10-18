@@ -53,7 +53,6 @@ void SPH::setKernelRadius(const double h)
 {
     checkKernelRadius(h);
     h_ = h;
-    std::cout << "h = " << h_ << std::endl;
 }
 
 void SPH::setParticles(const std::vector<Particle>& particles)
@@ -143,13 +142,6 @@ void SPH::setGrid(const double x_min, const double x_max, const double y_min, co
     z_grid_ = static_cast<int>(std::ceil((z_max_ - z_min_)/grid_spacing_)) + 1;
     z_max_ = z_min_ + grid_spacing_*z_grid_;
 
-
-    std::cout << "x_min, x_max, x_grid = " << x_min_ << "," << x_max_ << "," << x_grid_ << '\n';
-    std::cout << "y_min, y_max, y_grid = " << y_min_ << "," << y_max_ << "," << y_grid_ << '\n';
-    std::cout << "z_min, z_max, z_grid = " << z_min_ << "," << z_max_ << "," << z_grid_ << '\n';
-    std::cout << "grid_spacing = " << grid_spacing_ << '\n';
-    std::cout << "num_points = " << x_grid_*y_grid_*z_grid_ << '\n'; 
-
     /*set the grid*/
     grid_values_.clear();
     grid_values_.resize(x_grid_*y_grid_*z_grid_);
@@ -159,12 +151,6 @@ void SPH::setGrid(const double x_min, const double x_max, const double y_min, co
     bucket_y_ = static_cast<size_t>(std::ceil((y_max_ - y_min_)/h_));
     bucket_z_ = static_cast<size_t>(std::ceil((z_max_ - z_min_)/h_));
     num_buckets_ = bucket_x_*bucket_y_*bucket_z_;
-
-    std::cout << "bucket_x = " << bucket_x_ << '\n';
-    std::cout << "bucket_y = " << bucket_y_ << '\n';
-    std::cout << "bucket_z = " << bucket_z_ << '\n';
-    std::cout << "num_buckets = " << num_buckets_ << '\n';
-
 
     //initialize buckets
     buckets_.clear();
