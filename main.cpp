@@ -1,14 +1,10 @@
 #include <iostream>
 #include <vector>
+#include <fstream>
 #include "include/particle.hpp"
 #include "include/SPH.hpp"
-#include "include/generator.hpp"
-#include <cmath>
-#include <random>
-#include <fstream>
 
 using namespace std;
-
 
 int main(int argc, char **argv)
 {
