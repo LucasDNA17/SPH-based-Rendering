@@ -1,19 +1,17 @@
 #include "../include/kernel.hpp"
 #include <cmath>
 
-poly6Kernel::poly6Kernel(const float h): kernel(h), h_squared_(h_*h_), normalization_constant(315.0f/(64.0f*M_PI))
-{
-    float h_cubed = h_*h_*h_;
-    h_ninth_power_ = h_cubed*h_cubed*h_cubed;
-}
+poly6Kernel::poly6Kernel(const double h): kernel(h), h_squared_(h_*h_), h_cubed_(h_*h_squared_), normalization_constant(315.0f/(64.0f*M_PI))
+{}
 
-float poly6Kernel::smoothing_kernel(const float r_squared) const
+
+double poly6Kernel::smoothing_kernel(const double r_squared) const
 {
     if(r_squared > h_squared_)
         return 0;
     else
     {
-        float diff = h_squared_ - r_squared;
-        return normalization_constant*diff*diff*diff/h_ninth_power_;
+        double diff = 1 - (r_squared/h_squared_);
+        return normalization_constant*diff*diff*diff/h_cubed_;
     }
 }

@@ -5,7 +5,7 @@
 #include <chrono>
 
 /*Verification functions*/
-inline void checkKernelRadius(const float h)
+inline void checkKernelRadius(const double h)
 {
     if(h <= 0)
     {
@@ -32,28 +32,38 @@ inline void checkSmoothingKernel(const std::shared_ptr<kernel> W)
     }
 }
 
-inline void checkDimensions(float x_min, float x_max, float y_min, float y_max, float z_min, float z_max)
+// inline void checkDimensions(const double x_min, const double x_max, const double y_min, const double y_max, const double z_min, const double z_max)
+// {
+//     if(x_min > x_max || y_min > y_max || z_min > z_max)
+//     {
+//         std::cout << "Error. Min and max dimensions have not been correctly set!" << std::endl;
+//         exit(EXIT_FAILURE);
+//     }
+// }
+/*End of verification functions*/
+
+inline void checkDimensions(const double x_min, const double x_max, const double y_min, const double y_max, const double z_min, const double z_max, const double grid_spacing)
 {
-    if(x_min > x_max || y_min > y_max || z_min > z_max)
+    if(x_min > x_max || y_min > y_max || z_min > z_max || grid_spacing < 0)
     {
-        std::cout << "Error. Min and max dimensions have not been correctly set!" << std::endl;
+        std::cout << "Error. Min, max and spacing dimensions have not been correctly set!" << std::endl;
         exit(EXIT_FAILURE);
     }
 }
-/*End of verification functions*/
 
 
 
-inline float squaredDistanceFromParticle(const float x, const float y, const float z, const Particle& particle)
+inline double squaredDistanceFromParticle(const double x, const double y, const double z, const Particle& particle)
 {
     return (x - particle.x_)*(x - particle.x_) + (y - particle.y_)*(y - particle.y_) + (z - particle.z_)*(z - particle.z_);
 }
 
 /*Set functions*/
-void SPH::setKernelRadius(const float h)
+void SPH::setKernelRadius(const double h)
 {
     checkKernelRadius(h);
     h_ = h;
+    std::cout << "h = " << h_ << std::endl;
 }
 
 void SPH::setParticles(const std::vector<Particle>& particles)
@@ -106,7 +116,7 @@ void SPH::findMinMaxDimensions()
 }
 
 
-inline void SPH::getBucketIndexes(const float x, const float y, const float z, size_t &x_bucket, size_t &y_bucket, size_t &z_bucket) const
+inline void SPH::getBucketIndexes(const double x, const double y, const double z, size_t &x_bucket, size_t &y_bucket, size_t &z_bucket) const
 {
     x_bucket = static_cast<size_t>(std::floor((x - x_min_)/h_));
     y_bucket = static_cast<size_t>(std::floor((y - y_min_)/h_));
@@ -123,34 +133,92 @@ inline size_t SPH::bucketHash(const int bucket_x, const int bucket_y, const int 
     return bucket_z*bucket_x_*bucket_y_ + bucket_y*bucket_x_ + bucket_x;
 }
 
-void SPH::setGrid()
-{
-    checkParticles(particles_);
-    checkKernelRadius(h_);
-    findMinMaxDimensions();
+// void SPH::setGrid()
+// {
+//     checkParticles(particles_);
+//     checkKernelRadius(h_);
+//     findMinMaxDimensions();
     
-    //adjustment
-    x_min_ = static_cast<size_t>(std::max(std::floor(x_min_) - 2, 0.0f)); x_max_ = static_cast<int>(ceil(x_max_) + 2);
-    y_min_ = static_cast<size_t>(std::max(std::floor(y_min_) - 2, 0.0f)); y_max_ = static_cast<int>(ceil(y_max_) + 2);
-    z_min_ = static_cast<size_t>(std::max(std::floor(z_min_) - 2, 0.0f)); z_max_ = static_cast<int>(ceil(z_max_) + 2);
+//     //adjustment
+//     x_min_ = static_cast<size_t>(std::max(std::floor(x_min_) - 2, 0.0f)); x_max_ = static_cast<int>(ceil(x_max_) + 2);
+//     y_min_ = static_cast<size_t>(std::max(std::floor(y_min_) - 2, 0.0f)); y_max_ = static_cast<int>(ceil(y_max_) + 2);
+//     z_min_ = static_cast<size_t>(std::max(std::floor(z_min_) - 2, 0.0f)); z_max_ = static_cast<int>(ceil(z_max_) + 2);
 
-    checkDimensions(x_min_, x_max_, y_min_, y_max_, z_min_, z_max_);
+//     checkDimensions(x_min_, x_max_, y_min_, y_max_, z_min_, z_max_);
 
-    /*set the resolution*/
-    x_grid_ = x_max_ - x_min_ + 1;
-    y_grid_ = y_max_ - y_min_ + 1;
-    z_grid_ = z_max_ - z_min_ + 1;
+//     /*set the resolution*/
+//     x_grid_ = x_max_ - x_min_ + 1;
+//     y_grid_ = y_max_ - y_min_ + 1;
+//     z_grid_ = z_max_ - z_min_ + 1;
 
-    //set the grid
+//     //set the grid
+//     grid_values_.clear();
+//     grid_values_.resize(x_grid_*y_grid_*z_grid_);
+
+//     //set buckets
+//     bucket_x_ = static_cast<size_t>(std::ceil((x_max_ - x_min_)/h_));
+//     bucket_y_ = static_cast<size_t>(std::ceil((y_max_ - y_min_)/h_));
+//     bucket_z_ = static_cast<size_t>(std::ceil((z_max_ - z_min_)/h_));
+//     num_buckets_ = bucket_x_*bucket_y_*bucket_z_;
+    
+//     //initialize buckets
+//     buckets_.clear();
+//     buckets_.resize(num_buckets_);
+
+//     for(size_t i = 0; i < particles_.size(); i++)
+//     {
+//         size_t bucket_x, bucket_y, bucket_z;
+//         getBucketIndexes(particles_[i].x_, particles_[i].y_, particles_[i].z_, bucket_x, bucket_y, bucket_z);
+        
+//         size_t key = bucketHash(bucket_x, bucket_y, bucket_z);
+//         buckets_[key].push_back(i);
+//     }
+
+// }
+
+void SPH::setGrid(const double x_min, const double x_max, const double y_min, const double y_max, const double z_min, const double z_max, const double grid_spacing)
+{
+    checkDimensions(x_min, x_max, y_min, y_max, z_min, z_max, grid_spacing);
+    checkKernelRadius(h_);
+
+    x_min_ = x_min; x_max_ = x_max;
+    y_min_ = y_min; y_max_ = y_max;
+    z_min_ = z_min; z_max_ = z_max;
+    grid_spacing_ = grid_spacing;
+
+    /*adjust the dimensions for a regular grid*/
+    x_grid_ = static_cast<int>(std::ceil((x_max_ - x_min_)/grid_spacing_)) + 1;
+    x_max_ = x_min_ + grid_spacing_*x_grid_;
+
+    y_grid_ = static_cast<int>(std::ceil((y_max_ - y_min_)/grid_spacing_)) + 1;
+    y_max_ = y_min_ + grid_spacing_*y_grid_;
+
+    z_grid_ = static_cast<int>(std::ceil((z_max_ - z_min_)/grid_spacing_)) + 1;
+    z_max_ = z_min_ + grid_spacing_*z_grid_;
+
+
+    std::cout << "x_min, x_max, x_grid = " << x_min_ << "," << x_max_ << "," << x_grid_ << '\n';
+    std::cout << "y_min, y_max, y_grid = " << y_min_ << "," << y_max_ << "," << y_grid_ << '\n';
+    std::cout << "z_min, z_max, z_grid = " << z_min_ << "," << z_max_ << "," << z_grid_ << '\n';
+    std::cout << "grid_spacing = " << grid_spacing_ << '\n';
+    std::cout << "num_points = " << x_grid_*y_grid_*z_grid_ << '\n'; 
+
+    /*set the grid*/
     grid_values_.clear();
     grid_values_.resize(x_grid_*y_grid_*z_grid_);
 
-    //set buckets
+    /*set buckets*/
     bucket_x_ = static_cast<size_t>(std::ceil((x_max_ - x_min_)/h_));
     bucket_y_ = static_cast<size_t>(std::ceil((y_max_ - y_min_)/h_));
     bucket_z_ = static_cast<size_t>(std::ceil((z_max_ - z_min_)/h_));
     num_buckets_ = bucket_x_*bucket_y_*bucket_z_;
-    
+
+    std::cout << "bucket_x = " << bucket_x_ << '\n';
+    std::cout << "bucket_y = " << bucket_y_ << '\n';
+    std::cout << "bucket_z = " << bucket_z_ << '\n';
+    std::cout << "num_buckets = " << num_buckets_ << '\n';
+
+
     //initialize buckets
     buckets_.clear();
     buckets_.resize(num_buckets_);
@@ -163,8 +231,8 @@ void SPH::setGrid()
         size_t key = bucketHash(bucket_x, bucket_y, bucket_z);
         buckets_[key].push_back(i);
     }
-
 }
+
 
 void SPH::writeTxt(const char* filepath) const
 {
@@ -175,11 +243,20 @@ void SPH::writeTxt(const char* filepath) const
         exit(EXIT_FAILURE);
     }
 
-    for(size_t x = x_min_; x <= x_max_; x++)
-    for(size_t y = y_min_; y <= y_max_; y++)
-    for(size_t z = z_min_; z <= z_max_; z++)
+    /*Write the grid configurations*/
+    output_file << x_min_ << " " << x_max_ << '\n';
+    output_file << y_min_ << " " << y_max_ << '\n';
+    output_file << z_min_ << " " << z_max_ << '\n';
+    output_file << grid_spacing_ << '\n';
+
+    for(size_t idx_x = 0; idx_x < x_grid_; idx_x++)
+    for(size_t idx_y = 0; idx_y < y_grid_; idx_y++)
+    for(size_t idx_z = 0; idx_z < z_grid_; idx_z++)
     {
-        size_t idx = gridHash(x - x_min_, y - y_min_, z - z_min_);
+        double x = x_min_ + grid_spacing_*idx_x;
+        double y = y_min_ + grid_spacing_*idx_y;
+        double z = z_min_ + grid_spacing_*idx_z;   
+        size_t idx = gridHash((x - x_min_)/grid_spacing_, (y - y_min_)/grid_spacing_, (z - z_min_)/grid_spacing_);
         output_file << x << " " << y << " " << z << " " << grid_values_[idx] << '\n';
     }
 
@@ -195,17 +272,21 @@ inline size_t SPH::gridHash(const size_t x, const size_t y, const size_t z) cons
 void SPH::run()
 {
     checkSmoothingKernel(smoothing_kernel_);
-    checkDimensions(x_min_, x_max_, y_min_, y_max_, z_min_, z_max_);
+    checkDimensions(x_min_, x_max_, y_min_, y_max_, z_min_, z_max_, grid_spacing_);
 
     //bucket-based grid points iteration
     auto start = std::chrono::high_resolution_clock::now();
-    for(int x = x_min_; x <= x_max_; x++)
+    double h_squared = h_*h_;
+    for(size_t idx_x = 0; idx_x < x_grid_; idx_x++)
     {
-        for(int y = y_min_; y <= y_max_; y++)
+        for(size_t idx_y = 0; idx_y < y_grid_; idx_y++)
         {
-            for(int z = z_min_; z <= z_max_; z++)
+            for(size_t idx_z = 0; idx_z < z_grid_; idx_z++)
             {
-                float smoothed_color_field = 0;
+                double x = x_min_ + grid_spacing_*idx_x;
+                double y = y_min_ + grid_spacing_*idx_y;
+                double z = z_min_ + grid_spacing_*idx_z;
+                double smoothed_color_field = 0;
                 
                 size_t bucket_x, bucket_y, bucket_z;
                 getBucketIndexes(x, y, z, bucket_x, bucket_y, bucket_z);
@@ -226,15 +307,32 @@ void SPH::run()
                             {
                                 size_t bucket = bucketHash(new_bucket_x, new_bucket_y, new_bucket_z);            
                                 for(const size_t idx : buckets_[bucket])
-                                    smoothed_color_field += smoothing_kernel_->smoothing_kernel(squaredDistanceFromParticle(x, y, z, particles_[idx]))*particles_[idx].m_/particles_[idx].p_;
+                                {
+                                    // if(smoothing_kernel_->smoothing_kernel(squaredDistanceFromParticle(x, y, z, particles_[idx]))*particles_[idx].m_/particles_[idx].p_ > 0)
+                                    // {
+                                    //     std::cout << "Non zero kernel contribution " << '\n';
+                                    // }
+                                    double distance_from_particle = squaredDistanceFromParticle(x, y, z, particles_[idx]);
+                                    if(distance_from_particle <= h_squared)
+                                    {
+                                        smoothed_color_field += smoothing_kernel_->smoothing_kernel(distance_from_particle)*particles_[idx].m_/particles_[idx].p_;
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
-                size_t x_idx = x - x_min_, y_idx = y - y_min_, z_idx = z - z_min_; 
+                size_t x_idx = (size_t)((x - x_min_)/grid_spacing_), y_idx = (size_t)((y - y_min_)/grid_spacing_), z_idx = (size_t)((z - z_min_)/grid_spacing_); 
                 size_t idx = gridHash(x_idx, y_idx, z_idx);
                 grid_values_[idx] = smoothed_color_field;
+
+                // if(grid_values_[idx] > 0)
+                // {
+                //     std::cout << "Non zero grid value" << '\n';
+                // }
+
+
             }
         }
       }

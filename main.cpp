@@ -13,12 +13,14 @@ using namespace std;
 int main(int argc, char **argv)
 {
     std::cout << "Reading particles...\n";
-    float h;
-    std::vector<Particle> particles = readParticles(argv[1], &h);
+    double particle_spacing;
+    std::vector<Particle> particles = readParticles(argv[1], &particle_spacing);
     std::cout << "Done reading particles.\n";
 
     SPH algo;
-    
+
+    double particle_spacing_multiplier = atof(argv[3]);
+    double h = particle_spacing_multiplier*particle_spacing;
     std::cout << "Setting kernel radius...\n";
     algo.setKernelRadius(h);
     std::cout << "Done setting kernel radius...\n";
@@ -33,7 +35,7 @@ int main(int argc, char **argv)
     std::cout << "Done setting kernel function.\n";
     
     std::cout << "Setting grid...\n";
-    algo.setGrid();
+    algo.setGrid(0, 4, 0, 2, 0, 3, 0.02f);
     std::cout << "Done setting grid.\n";
 
     std::cout << "Running algorithm...\n";
@@ -41,8 +43,7 @@ int main(int argc, char **argv)
     std::cout << "Done. running algorithm\n";
 
     std::cout << "Writing results to file...\n";
-    const char *output_file = "smoothed_color_field.txt";
-    algo.writeTxt(output_file);
+    algo.writeTxt(argv[2]);
     std::cout << "Done writing results to file." << std::endl;
 
     return 0;
