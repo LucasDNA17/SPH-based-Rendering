@@ -32,16 +32,6 @@ inline void checkSmoothingKernel(const std::shared_ptr<kernel> W)
     }
 }
 
-// inline void checkDimensions(const double x_min, const double x_max, const double y_min, const double y_max, const double z_min, const double z_max)
-// {
-//     if(x_min > x_max || y_min > y_max || z_min > z_max)
-//     {
-//         std::cout << "Error. Min and max dimensions have not been correctly set!" << std::endl;
-//         exit(EXIT_FAILURE);
-//     }
-// }
-/*End of verification functions*/
-
 inline void checkDimensions(const double x_min, const double x_max, const double y_min, const double y_max, const double z_min, const double z_max, const double grid_spacing)
 {
     if(x_min > x_max || y_min > y_max || z_min > z_max || grid_spacing < 0)
@@ -132,49 +122,6 @@ inline size_t SPH::bucketHash(const int bucket_x, const int bucket_y, const int 
 {
     return bucket_z*bucket_x_*bucket_y_ + bucket_y*bucket_x_ + bucket_x;
 }
-
-// void SPH::setGrid()
-// {
-//     checkParticles(particles_);
-//     checkKernelRadius(h_);
-//     findMinMaxDimensions();
-    
-//     //adjustment
-//     x_min_ = static_cast<size_t>(std::max(std::floor(x_min_) - 2, 0.0f)); x_max_ = static_cast<int>(ceil(x_max_) + 2);
-//     y_min_ = static_cast<size_t>(std::max(std::floor(y_min_) - 2, 0.0f)); y_max_ = static_cast<int>(ceil(y_max_) + 2);
-//     z_min_ = static_cast<size_t>(std::max(std::floor(z_min_) - 2, 0.0f)); z_max_ = static_cast<int>(ceil(z_max_) + 2);
-
-//     checkDimensions(x_min_, x_max_, y_min_, y_max_, z_min_, z_max_);
-
-//     /*set the resolution*/
-//     x_grid_ = x_max_ - x_min_ + 1;
-//     y_grid_ = y_max_ - y_min_ + 1;
-//     z_grid_ = z_max_ - z_min_ + 1;
-
-//     //set the grid
-//     grid_values_.clear();
-//     grid_values_.resize(x_grid_*y_grid_*z_grid_);
-
-//     //set buckets
-//     bucket_x_ = static_cast<size_t>(std::ceil((x_max_ - x_min_)/h_));
-//     bucket_y_ = static_cast<size_t>(std::ceil((y_max_ - y_min_)/h_));
-//     bucket_z_ = static_cast<size_t>(std::ceil((z_max_ - z_min_)/h_));
-//     num_buckets_ = bucket_x_*bucket_y_*bucket_z_;
-    
-//     //initialize buckets
-//     buckets_.clear();
-//     buckets_.resize(num_buckets_);
-
-//     for(size_t i = 0; i < particles_.size(); i++)
-//     {
-//         size_t bucket_x, bucket_y, bucket_z;
-//         getBucketIndexes(particles_[i].x_, particles_[i].y_, particles_[i].z_, bucket_x, bucket_y, bucket_z);
-        
-//         size_t key = bucketHash(bucket_x, bucket_y, bucket_z);
-//         buckets_[key].push_back(i);
-//     }
-
-// }
 
 void SPH::setGrid(const double x_min, const double x_max, const double y_min, const double y_max, const double z_min, const double z_max, const double grid_spacing)
 {
@@ -308,10 +255,6 @@ void SPH::run()
                                 size_t bucket = bucketHash(new_bucket_x, new_bucket_y, new_bucket_z);            
                                 for(const size_t idx : buckets_[bucket])
                                 {
-                                    // if(smoothing_kernel_->smoothing_kernel(squaredDistanceFromParticle(x, y, z, particles_[idx]))*particles_[idx].m_/particles_[idx].p_ > 0)
-                                    // {
-                                    //     std::cout << "Non zero kernel contribution " << '\n';
-                                    // }
                                     double distance_from_particle = squaredDistanceFromParticle(x, y, z, particles_[idx]);
                                     if(distance_from_particle <= h_squared)
                                     {
@@ -326,13 +269,6 @@ void SPH::run()
                 size_t x_idx = (size_t)((x - x_min_)/grid_spacing_), y_idx = (size_t)((y - y_min_)/grid_spacing_), z_idx = (size_t)((z - z_min_)/grid_spacing_); 
                 size_t idx = gridHash(x_idx, y_idx, z_idx);
                 grid_values_[idx] = smoothed_color_field;
-
-                // if(grid_values_[idx] > 0)
-                // {
-                //     std::cout << "Non zero grid value" << '\n';
-                // }
-
-
             }
         }
       }
