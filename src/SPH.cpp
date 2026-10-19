@@ -3,6 +3,7 @@
 #include <cmath>
 #include <algorithm>
 #include <chrono>
+#include <omp.h>
 
 /*Verification functions*/
 inline void checkKernelRadius(const double h)
@@ -210,6 +211,9 @@ void SPH::run()
     //bucket-based grid points iteration
     auto start = std::chrono::high_resolution_clock::now();
     double h_squared = h_*h_;
+
+    int n_processors = omp_get_num_procs();
+    #pragma omp parallel for simd schedule(dynamic, 4000) num_threads(n_processors) collapse(3)
     for(size_t idx_x = 0; idx_x < x_grid_; idx_x++)
     {
         for(size_t idx_y = 0; idx_y < y_grid_; idx_y++)
@@ -257,7 +261,7 @@ void SPH::run()
                 grid_values_[idx] = smoothed_color_field;
             }
         }
-      }
+    }
 
     auto end = std::chrono::high_resolution_clock::now();
     auto execution_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);

@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Werror -Wall -g -O3 
+CXXFLAGS = -Werror -Wall -g -O3 -fopenmp
 
 SPH_DEPS = include/kernel.hpp include/particle.hpp include/SPH.hpp
 

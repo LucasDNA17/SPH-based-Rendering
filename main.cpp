@@ -30,6 +30,7 @@ int main(int argc, char **argv)
     algo.setSmoothingKernel(smoothing_kernel);
     std::cout << "Done setting kernel function.\n";
     
+    /*Example grid --> you must change this according to what you wish*/
     std::cout << "Setting grid...\n";
     algo.setGrid(0, 4, 0, 2, 0, 3, 0.02f);
     std::cout << "Done setting grid.\n";
